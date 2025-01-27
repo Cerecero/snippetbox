@@ -2,12 +2,25 @@ package main
 
 import (
 	"flag"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 )
 
 func main() {
+	// Logger
+	logFile, err := os.OpenFile("/tmp/info.log", os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mw := io.MultiWriter(os.Stdout, logFile)
+	defer logFile.Close()
+	infoLog := log.New(mw, "INFO\t", log.Ldate|log.Ltime)
+
+	errorLog := log.New(mw, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Command Line flag addr, default address :4000
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
@@ -21,10 +34,14 @@ func main() {
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
-
-	log.Printf("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	server := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+	infoLog.Printf("Starting server on %s", *addr)
+	err = server.ListenAndServe()
+	errorLog.Fatal(err)
 }
 
 type neuteredFileSystem struct {
