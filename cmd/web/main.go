@@ -9,6 +9,11 @@ import (
 	"path/filepath"
 )
 
+type application struct {
+	errorLog *log.Logger
+	infoLog *log.Logger
+}
+
 func main() {
 	// Logger
 	logFile, err := os.OpenFile("/tmp/info.log", os.O_RDWR|os.O_CREATE, 0666)
@@ -24,16 +29,20 @@ func main() {
 	// Command Line flag addr, default address :4000
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
-
+	
+	app := &application{
+		errorLog: errorLog,
+		infoLog: infoLog,
+	}
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static")})
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 	server := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
