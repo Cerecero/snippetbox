@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/Cerecero/snippetbox/config"
 )
 
-type application struct {
-	errorLog *log.Logger
-	infoLog *log.Logger
-}
+// type application struct {
+// 	errorLog *log.Logger
+// 	infoLog *log.Logger
+// }
 
 func main() {
 	// Logger
@@ -30,9 +32,9 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 	
-	app := &application{
-		errorLog: errorLog,
-		infoLog: infoLog,
+	app := &config.Application{
+		ErrorLog: errorLog,
+		InfoLog: infoLog,
 	}
 	mux := http.NewServeMux()
 
@@ -40,9 +42,9 @@ func main() {
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
 
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet/view", app.snippetView)
-	mux.HandleFunc("/snippet/create", app.snippetCreate)
+	mux.HandleFunc("/", home(app))
+	mux.HandleFunc("/snippet/view", snippetView(app))
+	mux.HandleFunc("/snippet/create", snippetCreate(app))
 	server := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
