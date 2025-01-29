@@ -1,13 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"io"
 	"log"
 	"net/http"
 	"os"
-
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/Cerecero/snippetbox/config"
+	"github.com/Cerecero/snippetbox/internal/models"
 )
 
 func main() {
@@ -24,11 +26,19 @@ func main() {
 
 	// Command Line flag addr, default address :4000
 	addr := flag.String("addr", ":4000", "HTTP network address")
+	dsn := flag.String("dsn", "postgres://web:pass@localhost:5432/snippetbox?sslmode=disable", "PostgreSQL data source name")
 	flag.Parse()
-	
+
+	db, err := openDB(*dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	defer db.Close()
 	app := &config.Application{
 		ErrorLog: errorLog,
-		InfoLog: infoLog,
+		InfoLog:  infoLog,
+		Snippets: &models.SnippetModel{DB: db},
 	}
 
 	server := &http.Server{
@@ -39,4 +49,16 @@ func main() {
 	infoLog.Printf("Starting server on %s", *addr)
 	err = server.ListenAndServe()
 	errorLog.Fatal(err)
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
