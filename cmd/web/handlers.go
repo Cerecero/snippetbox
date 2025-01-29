@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
 
 	"github.com/Cerecero/snippetbox/config"
+	"github.com/Cerecero/snippetbox/internal/models"
 )
 
 func home(app *config.Application) http.HandlerFunc {
@@ -39,7 +41,16 @@ func snippetView(app *config.Application) http.HandlerFunc {
 			notFount(app, w)
 			return
 		}
-		fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
+		snippet, err := app.Snippets.Get(id)
+		if err != nil {
+			if errors.Is(err, models.ErrNoRecord) {
+				notFount(app, w)
+			} else {
+				serverError(app, w, err)
+			}
+			return
+		}
+		fmt.Fprintf(w, "%+v", snippet)
 	}
 }
 func snippetCreate(app *config.Application) http.HandlerFunc {
