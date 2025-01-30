@@ -17,18 +17,28 @@ func home(app *config.Application) http.HandlerFunc {
 			notFount(app, w)
 			return
 		}
+
+		snippets, err := app.Snippets.Lastest()
+		if err != nil {
+			serverError(app, w, err)
+			return
+		}
+
 		files := []string{
 			"./ui/html/base.tmpl",
 			"./ui/html/pages/home.tmpl",
 			"./ui/html/partials/nav.tmpl",
 		}
-
 		ts, err := template.ParseFiles(files...)
 		if err != nil {
 			serverError(app, w, err)
 			return
 		}
-		err = ts.ExecuteTemplate(w, "base", nil)
+
+		data := &templateData{
+			Snippets: snippets,
+		}
+		err = ts.ExecuteTemplate(w, "base", data)
 		if err != nil {
 			serverError(app, w, err)
 		}
@@ -50,7 +60,25 @@ func snippetView(app *config.Application) http.HandlerFunc {
 			}
 			return
 		}
-		fmt.Fprintf(w, "%+v", snippet)
+		files := []string{
+			"./ui/html/base.tmpl",
+			"./ui/html/partials/nav.tmpl",
+			"./ui/html/pages/view.tmpl",
+		}
+
+		ts, err := template.ParseFiles(files...)
+		if err != nil {
+			serverError(app, w, err)
+			return
+		}
+
+		data := templateData{
+			Snippet: snippet,
+		}
+		err = ts.ExecuteTemplate(w, "base", data)
+		if err != nil {
+			serverError(app, w, err)
+		}
 	}
 }
 func snippetCreate(app *config.Application) http.HandlerFunc {
