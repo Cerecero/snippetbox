@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"html/template"
 	"io"
 	"log"
 	"net/http"

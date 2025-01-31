@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -23,25 +22,27 @@ func home(app *config.Application) http.HandlerFunc {
 			serverError(app, w, err)
 			return
 		}
-
-		files := []string{
-			"./ui/html/base.tmpl",
-			"./ui/html/pages/home.tmpl",
-			"./ui/html/partials/nav.tmpl",
-		}
-		ts, err := template.ParseFiles(files...)
-		if err != nil {
-			serverError(app, w, err)
-			return
-		}
-
-		data := &templateData{
+		render(app, w, http.StatusOK, "home.tmpl", &templateData{
 			Snippets: snippets,
-		}
-		err = ts.ExecuteTemplate(w, "base", data)
-		if err != nil {
-			serverError(app, w, err)
-		}
+		})
+		// files := []string{
+		// 	"./ui/html/base.tmpl",
+		// 	"./ui/html/pages/home.tmpl",
+		// 	"./ui/html/partials/nav.tmpl",
+		// }
+		// ts, err := template.ParseFiles(files...)
+		// if err != nil {
+		// 	serverError(app, w, err)
+		// 	return
+		// }
+		//
+		// data := &templateData{
+		// 	Snippets: snippets,
+		// }
+		// err = ts.ExecuteTemplate(w, "base", data)
+		// if err != nil {
+		// 	serverError(app, w, err)
+		// }
 	}
 }
 func snippetView(app *config.Application) http.HandlerFunc {
@@ -60,25 +61,29 @@ func snippetView(app *config.Application) http.HandlerFunc {
 			}
 			return
 		}
-		files := []string{
-			"./ui/html/base.tmpl",
-			"./ui/html/partials/nav.tmpl",
-			"./ui/html/pages/view.tmpl",
-		}
 
-		ts, err := template.ParseFiles(files...)
-		if err != nil {
-			serverError(app, w, err)
-			return
-		}
-
-		data := templateData{
+		render(app, w, http.StatusOK, "view.tmpl", &templateData{
 			Snippet: snippet,
-		}
-		err = ts.ExecuteTemplate(w, "base", data)
-		if err != nil {
-			serverError(app, w, err)
-		}
+		})
+		// files := []string{
+		// 	"./ui/html/base.tmpl",
+		// 	"./ui/html/partials/nav.tmpl",
+		// 	"./ui/html/pages/view.tmpl",
+		// }
+		//
+		// ts, err := template.ParseFiles(files...)
+		// if err != nil {
+		// 	serverError(app, w, err)
+		// 	return
+		// }
+		//
+		// data := templateData{
+		// 	Snippet: snippet,
+		// }
+		// err = ts.ExecuteTemplate(w, "base", data)
+		// if err != nil {
+		// 	serverError(app, w, err)
+		// }
 	}
 }
 func snippetCreate(app *config.Application) http.HandlerFunc {

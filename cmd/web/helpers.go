@@ -22,3 +22,19 @@ func clientError(_ *config.Application,w http.ResponseWriter, status int) {
 func notFount(app *config.Application, w http.ResponseWriter) {
 	clientError(app, w, http.StatusNotFound)
 }
+
+func render(app *config.Application, w http.ResponseWriter, status int, page string, data *templateData){
+	ts, ok := app.TemplateCache[page]
+	if !ok {
+		err := fmt.Errorf("the tempolate %s does not exist", page)
+		serverError(app, w, err)
+		return
+	}
+
+	w.WriteHeader(status)
+
+	err := ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		serverError(app, w, err)
+	}
+}
