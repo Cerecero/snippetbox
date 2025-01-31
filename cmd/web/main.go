@@ -3,13 +3,15 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	_ "github.com/jackc/pgx/v5/stdlib"
+
 	"github.com/Cerecero/snippetbox/config"
 	"github.com/Cerecero/snippetbox/internal/models"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
@@ -35,10 +37,16 @@ func main() {
 	}
 
 	defer db.Close()
+
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
 	app := &config.Application{
 		ErrorLog: errorLog,
 		InfoLog:  infoLog,
 		Snippets: &models.SnippetModel{DB: db},
+		TemplateCache: templateCache,
 	}
 
 	server := &http.Server{
