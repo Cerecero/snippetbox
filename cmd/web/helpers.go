@@ -5,29 +5,28 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/Cerecero/snippetbox/config"
 )
 
-func serverError(app *config.Application,w http.ResponseWriter, err error) {
+func (app *application) serverError(w http.ResponseWriter, err error) {
 		trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 		app.ErrorLog.Output(2, trace)
 
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func clientError(_ *config.Application,w http.ResponseWriter, status int) {
+func (app *application)clientError(w http.ResponseWriter, status int) {
 		http.Error(w, http.StatusText(status), status)
 }
 
-func notFount(app *config.Application, w http.ResponseWriter) {
-	clientError(app, w, http.StatusNotFound)
+func (app *application) notFount( w http.ResponseWriter) {
+	app.clientError(w, http.StatusNotFound)
 }
 
-func render(app *config.Application, w http.ResponseWriter, status int, page string, data *templateData){
+func (app *application) render(w http.ResponseWriter, status int, page string, data *templateData){
 	ts, ok := app.TemplateCache[page]
 	if !ok {
 		err := fmt.Errorf("the tempolate %s does not exist", page)
-		serverError(app, w, err)
+		app.serverError( w, err)
 		return
 	}
 
@@ -35,6 +34,6 @@ func render(app *config.Application, w http.ResponseWriter, status int, page str
 
 	err := ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		serverError(app, w, err)
+		app.serverError(w, err)
 	}
 }

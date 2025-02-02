@@ -4,17 +4,16 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/Cerecero/snippetbox/config"
 )
 
-func routes(app *config.Application) *http.ServeMux{
+func (app *application) routes() *http.ServeMux{
 	mux := http.NewServeMux()
 	filesServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static/")})
 	mux.Handle("/static/", http.StripPrefix("/static", filesServer))
 
-	mux.HandleFunc("/", home(app))
-	mux.HandleFunc("/snippet/view", snippetView(app))
-	mux.HandleFunc("/snippet/create",  snippetCreate(app))
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create",  app.snippetCreate)
 
 	return mux
 }

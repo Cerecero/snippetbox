@@ -3,15 +3,21 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/Cerecero/snippetbox/config"
 	"github.com/Cerecero/snippetbox/internal/models"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
+type application struct{
+	ErrorLog *log.Logger
+	InfoLog *log.Logger
+	Snippets *models.SnippetModel
+	TemplateCache map[string]*template.Template
+}
 
 func main() {
 	// Logger
@@ -41,7 +47,7 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
-	app := &config.Application{
+	app := &application{
 		ErrorLog: errorLog,
 		InfoLog:  infoLog,
 		Snippets: &models.SnippetModel{DB: db},
@@ -51,7 +57,7 @@ func main() {
 	server := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler:  routes(app),
+		Handler:  app.routes(),
 	}
 	infoLog.Printf("Starting server on %s", *addr)
 	err = server.ListenAndServe()
