@@ -6,7 +6,7 @@ import (
 
 )
 
-func (app *application) routes() *http.ServeMux{
+func (app *application) routes() http.Handler{
 	mux := http.NewServeMux()
 	filesServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static/")})
 	mux.Handle("/static/", http.StripPrefix("/static", filesServer))
@@ -15,9 +15,8 @@ func (app *application) routes() *http.ServeMux{
 	mux.HandleFunc("/snippet/view", app.snippetView)
 	mux.HandleFunc("/snippet/create",  app.snippetCreate)
 
-	return mux
+	return app.recoverPanic(app.logRequest(secureHeaders(mux)))
 }
-// mux.Handle("/static", http.NotFoundHandler())
 
 type neuteredFileSystem struct {
 	fs http.FileSystem
