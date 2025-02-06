@@ -10,11 +10,6 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		app.notFount(w)
-		return
-	}
-
 
 	snippets, err := app.Snippets.Lastest()
 	if err != nil {
