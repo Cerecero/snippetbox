@@ -13,7 +13,7 @@ import (
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
-	snippets, err := app.Snippets.Lastest()
+	snippets, err := app.snippets.Lastest()
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -30,7 +30,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		app.notFount(w)
 		return
 	}
-	snippet, err := app.Snippets.Get(id)
+	snippet, err := app.snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFount(w)
@@ -83,7 +83,7 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	id, err := app.Snippets.Insert(form.Title, form.Content, form.Expires)
+	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(w, err)
 		return
