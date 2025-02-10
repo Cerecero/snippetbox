@@ -71,7 +71,6 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-
 	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
 	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
@@ -92,4 +91,24 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 
 	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+}
+
+func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Display a HTML form for signing up a new user...")
+}
+func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintln(w, "Create a new user...")
+}
+func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintln(w, "Display a HTML form for logging a user...")
+}
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintln(w, "Authenticate and login the user...")
+}
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintln(w, "Logout the user...")
 }
