@@ -3,10 +3,12 @@ package models
 import (
 	"database/sql"
 	"errors"
-	"strings"
+	"fmt"
+
 	"time"
 
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
+	// "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,6 +25,7 @@ type UserModel struct {
 }
 
 func (m *UserModel) Insert(name, email, password string) error {
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return err
@@ -32,12 +35,14 @@ func (m *UserModel) Insert(name, email, password string) error {
 
 	_, err = m.DB.Exec(stmt, name, email, string(hashedPassword))
 	if err != nil {
-		var postgresSQLError *pq.Error
-		if errors.As(err, &postgresSQLError) {
-			// PostgresSQL unique violation 23505
-			if postgresSQLError.Code.Class() == "23" && strings.Contains(postgresSQLError.Code.Name(), "unique_violation") {
+		var pqErr *pgconn.PgError
+		// unwrappedErr := errors.Unwrap(err)
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23505" && pqErr.ConstraintName== "users_uc_email" {
 				return ErrDuplicateEmail
 			}
+		} else {
+			fmt.Println("Errors is not pq.Error, type", fmt.Sprintf("%T", err))
 		}
 		return err
 	}
