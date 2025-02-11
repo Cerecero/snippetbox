@@ -2,7 +2,12 @@ package models
 
 import (
 	"database/sql"
+	"errors"
+	"strings"
 	"time"
+
+	"github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -15,6 +20,28 @@ type User struct {
 
 type UserModel struct {
 	DB *sql.DB
+}
+
+func (m *UserModel) Insert(name, email, password string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+
+	stmt := "INSERT INTO users (name, email, hashed_password, created) VALUES ($1, $2, $3, NOW() AT TIME ZONE 'UTC')"
+
+	_, err = m.DB.Exec(stmt, name, email, string(hashedPassword))
+	if err != nil {
+		var postgresSQLError *pq.Error
+		if errors.As(err, &postgresSQLError) {
+			// PostgresSQL unique violation 23505
+			if postgresSQLError.Code.Class() == "23" && strings.Contains(postgresSQLError.Code.Name(), "unique_violation") {
+				return ErrDuplicateEmail
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 func (m *UserModel) Authenticate(email, password string) (int, error) {
