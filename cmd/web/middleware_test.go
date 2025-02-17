@@ -5,11 +5,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	"github.com/Cerecero/snippetbox/internal/assert"
 )
 
-func TestSecureHeadera(t *tessting.T) {
+func TestSecureHeadera(t *testing.T) {
 	rr := httptest.NewRecorder()
 	r, err := http.NewRequest(http.MethodGet, "/", nil)
 	if err != nil {

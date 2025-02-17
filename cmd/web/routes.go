@@ -17,6 +17,8 @@ func (app *application) routes() http.Handler{
 	})
 
 	fileServer := http.FileServer(http.FS(ui.Files))
+	// For testing GET /ping route
+	router.HandlerFunc(http.MethodGet, "/ping", ping)
 
 	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		app.notFount(w)
