@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+type SnippetModelInterface interface {
+	Insert(title string, content string, expires int) (int, error)
+	Get(id int) (*Snippet, error)
+	Latest() ([]*Snippet, error)
+}
+
 type Snippet struct {
 	ID      int
 	Title   string
@@ -47,7 +53,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 	return s, nil
 }
 
-func (m *SnippetModel) Lastest() ([]*Snippet, error) {
+func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	stmt := `SELECT id, title, content, created, expires FROM snippets
 	WHERE expires > NOW() AT TIME ZONE 'UTC' ORDER BY id DESC LIMIT 10;`
 
