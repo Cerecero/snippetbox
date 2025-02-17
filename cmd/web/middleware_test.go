@@ -22,19 +22,23 @@ func TestSecureHeadera(t *tessting.T) {
 
 	secureHeaders(next).ServeHTTP(rr, r)
 	rs := rr.Result()
-
+	// Check Content-Security-Policiy
 	expectedValue := "default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com"
 	assert.Equal(t, rs.Header.Get("Content-Security-Policy"), expectedValue)
 
+	// Check Referrer-Policiy
 	expectedValue = "origin-when-cross-origin"
 	assert.Equal(t, rs.Header.Get("Referrer-Policy"), expectedValue)
 
+	// Check X-Content-Type-Options 
 	expectedValue = "nosniff"
 	assert.Equal(t, rs.Header.Get("X-Content-Type-Options"), expectedValue)
 
+	// Check X-Frame-Optiions 
 	expectedValue = "deny"
 	assert.Equal(t, rs.Header.Get("X-Frame-Options"), expectedValue)
 
+	// Check X-XSS-Protection
 	expectedValue = "0"
 	assert.Equal(t, rs.Header.Get("X-XSS-Protection"), expectedValue)
 	assert.Equal(t, rs.StatusCode, http.StatusOK)
