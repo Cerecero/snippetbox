@@ -27,6 +27,7 @@ type application struct {
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
+	debug          bool
 }
 
 func main() {
@@ -44,6 +45,7 @@ func main() {
 	// Command Line flag addr, default address :4000
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	dsn := flag.String("dsn", "postgres://web:pass@localhost:5432/snippetbox?sslmode=disable", "PostgreSQL data source name")
+	debug := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
 	db, err := openDB(*dsn)
@@ -73,6 +75,7 @@ func main() {
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
+		debug:          *debug,
 	}
 
 	tlsConfig := &tls.Config{
