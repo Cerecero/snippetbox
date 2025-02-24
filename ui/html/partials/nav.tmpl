@@ -8,8 +8,8 @@
         {{end}}
     </div>
     <div>
-
         {{if .IsAuthenticated}}
+            <a href='/account/view'>Account</a>
             <form action='/user/logout' method='POST'>
                 <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
                 <button>Logout</button>
